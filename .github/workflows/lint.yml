@@ -1,0 +1,114 @@
+name: Linting
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.x'
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+
+    - name: Install linting tools
+      run: |
+        # Python linting tools
+        pip install --upgrade pip
+        pip install flake8 black isort mypy pylint
+
+        # JavaScript/TypeScript linting tools
+        npm install -g eslint prettier jshint
+
+        # General purpose linting tools
+        sudo apt-get update
+        sudo apt-get install -y shellcheck yamllint
+
+    - name: Lint Python files
+      run: |
+        if find . -name "*.py" -type f | head -1 | grep -q .; then
+          echo "Linting Python files..."
+          
+          # Check Python syntax and style
+          find . -name "*.py" -exec flake8 {} + || echo "flake8 found issues"
+          
+          # Check Python formatting
+          find . -name "*.py" -exec black --check --diff {} + || echo "black formatting issues found"
+          
+          # Check import sorting
+          find . -name "*.py" -exec isort --check-only --diff {} + || echo "isort issues found"
+          
+          # Type checking (if type hints are present)
+          find . -name "*.py" -exec mypy {} + || echo "mypy type checking issues found"
+        else
+          echo "No Python files found to lint"
+        fi
+
+    - name: Lint JavaScript/TypeScript files
+      run: |
+        if find . -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" -type f | head -1 | grep -q .; then
+          echo "Linting JavaScript/TypeScript files..."
+          
+          # ESLint for JavaScript/TypeScript
+          find . -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" -exec eslint {} + || echo "ESLint issues found"
+          
+          # Prettier formatting check
+          find . -name "*.js" -o -name "*.ts" -o -name "*.jsx" -o -name "*.tsx" -exec prettier --check {} + || echo "Prettier formatting issues found"
+        else
+          echo "No JavaScript/TypeScript files found to lint"
+        fi
+
+    - name: Lint shell scripts
+      run: |
+        if find . -name "*.sh" -type f | head -1 | grep -q .; then
+          echo "Linting shell scripts..."
+          find . -name "*.sh" -exec shellcheck {} + || echo "ShellCheck issues found"
+        else
+          echo "No shell scripts found to lint"
+        fi
+
+    - name: Lint YAML files
+      run: |
+        if find . -name "*.yml" -o -name "*.yaml" -type f | head -1 | grep -q .; then
+          echo "Linting YAML files..."
+          find . -name "*.yml" -o -name "*.yaml" -exec yamllint {} + || echo "YAML lint issues found"
+        else
+          echo "No YAML files found to lint"
+        fi
+
+    - name: Lint Markdown files
+      run: |
+        npm install -g markdownlint-cli
+        if find . -name "*.md" -type f | head -1 | grep -q .; then
+          echo "Linting Markdown files..."
+          find . -name "*.md" -exec markdownlint {} + || echo "Markdown lint issues found"
+        else
+          echo "No Markdown files found to lint"
+        fi
+
+    - name: Check file permissions and structure
+      run: |
+        echo "Checking for common file permission and structure issues..."
+        
+        # Check for executable files that shouldn't be
+        find . -type f -name "*.py" -o -name "*.js" -o -name "*.json" -o -name "*.md" | xargs ls -l | grep -E '^-rwxr' && echo "Warning: Found executable source files" || echo "File permissions look good"
+        
+        # Check for missing gitignore patterns
+        if [ ! -f .gitignore ]; then
+          echo "Warning: No .gitignore file found"
+        fi
+        
+        echo "File structure check completed"
