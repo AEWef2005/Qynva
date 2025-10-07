@@ -1,0 +1,59 @@
+{
+  "llm_providers": {
+    "grok": {
+      "api_key": "${GROK_API_KEY}",
+      "model": "grok-beta",
+      "endpoint": "https://api.x.ai/v1",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    },
+    "openai": {
+      "api_key": "${OPENAI_API_KEY}",
+      "model": "gpt-4",
+      "endpoint": "https://api.openai.com/v1",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    },
+    "claude": {
+      "api_key": "${CLAUDE_API_KEY}",
+      "model": "claude-3-sonnet-20240229",
+      "endpoint": "https://api.anthropic.com/v1",
+      "max_tokens": 4096,
+      "temperature": 0.7
+    }
+  },
+  "default_provider": "grok",
+  "workflow": {
+    "plan_agent": "planner",
+    "code_agent": "coder",
+    "test_agent": "tester",
+    "review_agent": "reviewer",
+    "auto_commit": true,
+    "staging_dir": "agents/staging",
+    "review_threshold": 0.8
+  },
+  "code_style": {
+    "python": "pep8",
+    "javascript": "standard",
+    "rust": "rustfmt",
+    "cpp": "google"
+  },
+  "test_frameworks": {
+    "python": ["pytest", "unittest"],
+    "javascript": ["jest", "mocha"],
+    "rust": ["built-in"],
+    "cpp": ["gtest", "catch2"]
+  },
+  "coverage_threshold": 80,
+  "github": {
+    "auto_pr_review": true,
+    "branch_protection": true,
+    "required_reviews": 1,
+    "merge_strategy": "squash"
+  },
+  "logging": {
+    "level": "INFO",
+    "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    "file": "agents/logs/agents.log"
+  }
+}
