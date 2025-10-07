@@ -67,24 +67,24 @@ jobs:
           echo "No Python tests found, creating a basic test structure..."
           mkdir -p tests
           cat > tests/test_basic.py << 'EOF'
-          import unittest
+        import unittest
 
-          class TestBasic(unittest.TestCase):
-              def test_basic_functionality(self):
-                  """Basic test to ensure testing infrastructure works"""
-                  self.assertEqual(1 + 1, 2)
-                  self.assertTrue(True)
-                  
-              def test_environment_setup(self):
-                  """Test that the environment is set up correctly"""
-                  import sys
-                  import os
-                  self.assertIsNotNone(sys.version)
-                  self.assertIsNotNone(os.getcwd())
+        class TestBasic(unittest.TestCase):
+            def test_basic_functionality(self):
+                """Basic test to ensure testing infrastructure works"""
+                self.assertEqual(1 + 1, 2)
+                self.assertTrue(True)
+                
+            def test_environment_setup(self):
+                """Test that the environment is set up correctly"""
+                import sys
+                import os
+                self.assertIsNotNone(sys.version)
+                self.assertIsNotNone(os.getcwd())
 
-          if __name__ == '__main__':
-              unittest.main()
-          EOF
+        if __name__ == '__main__':
+            unittest.main()
+        EOF
           python -m pytest tests/ -v
         fi
       shell: bash
