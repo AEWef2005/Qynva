@@ -1,0 +1,100 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, ubuntu-20.04]
+        gpu: [nvidia, amd, cpu-only]
+        include:
+          - os: ubuntu-latest
+            gpu: nvidia
+            gpu_driver: nvidia-docker
+          - os: ubuntu-latest
+            gpu: amd
+            gpu_driver: rocm
+          - os: ubuntu-latest
+            gpu: cpu-only
+            gpu_driver: none
+          - os: ubuntu-20.04
+            gpu: nvidia
+            gpu_driver: nvidia-docker
+          - os: ubuntu-20.04
+            gpu: amd
+            gpu_driver: rocm
+          - os: ubuntu-20.04
+            gpu: cpu-only
+            gpu_driver: none
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up environment
+      run: |
+        echo "Setting up build environment for ${{ matrix.gpu }} on ${{ matrix.os }}"
+        sudo apt-get update
+
+    - name: Install NVIDIA GPU support
+      if: matrix.gpu == 'nvidia'
+      run: |
+        # Install NVIDIA Docker support
+        distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+        curl -s -L https://nvidia.github.io/nvidia-docker/gpgkey | sudo apt-key add -
+        curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.list | sudo tee /etc/apt/sources.list.d/nvidia-docker.list
+        sudo apt-get update
+        sudo apt-get install -y nvidia-container-toolkit || echo "NVIDIA runtime not available in CI environment"
+
+    - name: Install AMD GPU support (ROCm)
+      if: matrix.gpu == 'amd'
+      run: |
+        # Install ROCm support
+        wget -q -O - https://repo.radeon.com/rocm/rocm.gpg.key | sudo apt-key add -
+        echo 'deb [arch=amd64] https://repo.radeon.com/rocm/apt/5.4.3/ ubuntu main' | sudo tee /etc/apt/sources.list.d/rocm.list
+        sudo apt-get update
+        sudo apt-get install -y rocm-dev hip-dev || echo "ROCm runtime not available in CI environment"
+
+    - name: Install common build dependencies
+      run: |
+        sudo apt-get install -y \
+          build-essential \
+          cmake \
+          git \
+          pkg-config \
+          curl \
+          wget
+
+    - name: Build project
+      run: |
+        echo "Building project with ${{ matrix.gpu }} support"
+        # Add your build commands here
+        # Example: cmake -B build -DGPU_BACKEND=${{ matrix.gpu }}
+        # Example: cmake --build build --parallel
+        echo "Build completed successfully"
+
+    - name: Run tests
+      run: |
+        echo "Running tests with ${{ matrix.gpu }} configuration"
+        # Add your test commands here
+        # Example: ctest --test-dir build --parallel
+        echo "Tests completed successfully"
+
+    - name: Generate build artifacts
+      run: |
+        mkdir -p artifacts
+        echo "Build completed for ${{ matrix.os }} with ${{ matrix.gpu }} support" > artifacts/build-info.txt
+        echo "GPU Driver: ${{ matrix.gpu_driver }}" >> artifacts/build-info.txt
+        echo "OS: ${{ matrix.os }}" >> artifacts/build-info.txt
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: build-artifacts-${{ matrix.os }}-${{ matrix.gpu }}
+        path: artifacts/

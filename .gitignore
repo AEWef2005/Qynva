@@ -246,6 +246,46 @@ ENV/
 env.bak/
 venv.bak/
 
+# IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Build artifacts
+*.o
+*.a
+*.lib
+*.dll
+*.exe
+*.out
+*.app
+
+# GPU-specific
+*.ptx
+*.cubin
+
+# Temporary files
+tmp/
+temp/
+*.tmp
+*.temp
+
+# Logs
+*.log
+logs/
+
+# Node.js
 # Spyder project settings
 .spyderproject
 .spyproject
@@ -675,6 +715,26 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+# Rust
+target/
+Cargo.lock
+
+# Go
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Go workspace file
+go.work
 # Conan
 conanfile.txt.user
 conanbuildinfo.*
